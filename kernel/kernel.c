@@ -27,8 +27,9 @@ void _start() {
     int nextpos = printl(video_memory, message, 0);
     while(1) {
         unsigned char ch = getchar();
+        if (ch == 0) continue;
         unsigned char ch_descaned = transform(ch);
-        printc(video_memory, ch_descaned, (char *)0x07, nextpos+1); 
+        printc(video_memory, ch_descaned, (char *)0x07, nextpos+1);
         nextpos++;
     }
 }

@@ -26,11 +26,11 @@ unsigned char getchar(void) {
         scancode &= 1;
     } while (!scancode);
     
-    unsigned char scancode = inb(0x60);
-    if (scancode & 0x80) {
+    unsigned char scan = inb(0x60);
+    if (scan & 0x80) {
         return 0;
     }
-    return scancode;
+    return scan;
 }
 
 unsigned char transform(unsigned char ch) {
