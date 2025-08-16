@@ -1,4 +1,6 @@
 #include "stdio.h"
+#include "stdlib.h"
+#include "string.h"
 #include "types.h"
 
 #define MULTIBOOT_MAGIC 0x1BADB002
@@ -23,13 +25,34 @@ void _start() {
     __asm__ volatile ("mov %0, %%esp" : : "r" (stack_top));
 
     char* video_memory = (char*)0xB8000;
-    const char* message = "HabrOS 0.0.2                                                                    >>> ";
+    const char* message = "HabrOS 0.0.2         \n";
     int nextpos = printl(video_memory, message, 0);
+    unsigned char command[70];
+    unsigned char ch;
+    unsigned char ch_dec;
+    int i = 0;
     while(1) {
-        unsigned char ch = getchar();
-        if (ch == 0) continue;
-        unsigned char ch_descaned = transform(ch);
-        printc(video_memory, ch_descaned, (char *)0x07, nextpos+1);
-        nextpos++;
+        nextpos = printl(video_memory, ">>> ", nextpos);
+        do {
+            ch = getchar();
+            ch_dec = transform(ch);
+            if (ch_dec == (unsigned char)0x00) {continue;}
+            if (ch_dec == (unsigned char)0x0A) {
+                nextpos = (nextpos/80+1)*80-1;
+                printc(video_memory, ' ', (char*)0x07, nextpos);
+                break;
+            }
+            printc(video_memory, ch_dec, (char*)0x07, nextpos++);
+            command[i] = ch_dec;
+            i++;
+        } while (ch_dec != (unsigned char)0x0A);
+        command[i+1] = '\0';
+        if (strequ((const char*)command, (const char*)"11")) {
+            shutdown();
+        }
+        if (strequ((const char*)command, (const char*)"12")) {
+            nextpos = printl(video_memory, version, nextpos++);
+        }
+        i = 0;
     }
 }
