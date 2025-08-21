@@ -1,15 +1,16 @@
+#include "asm_methods.h"
+#include "syscalls.h"
+#include "pc_speaker.h"
 #include "stdio.h"
-#include "stdlib.h"
 #include "string.h"
 #include "types.h"
-
 #define MULTIBOOT_MAGIC 0x1BADB002
 #define MULTIBOOT_FLAGS 0
 
 typedef struct {
-    u32 magic;
-    u32 flags;
-    u32 checksum;
+    ui32 magic;
+    ui32 flags;
+    ui32 checksum;
 } __attribute__((packed)) multiboot_header_t;
 
 multiboot_header_t multiboot_header = {
@@ -20,39 +21,80 @@ multiboot_header_t multiboot_header = {
 
 unsigned char stack[4096] __attribute__((aligned(16)));
 unsigned char* stack_top = stack + sizeof(stack);
+/*
+unsigned char heap[8] = {
+    (unsigned char*)stack_top+1, (unsigned char*)stack_top+2,
+    (unsigned char*)stack_top+3, (unsigned char*)stack_top+4,
+    (unsigned char*)stack_top+5, (unsigned char*)stack_top+6,
+    (unsigned char*)stack_top+7, (unsigned char*)stack_top+8
+};
+*/
 
 void _start() {
+    clear();
+    beep();
+    write_logo();
+    wait(5000);
+    clear();
+    
     __asm__ volatile ("mov %0, %%esp" : : "r" (stack_top));
 
-    char* video_memory = (char*)0xB8000;
-    const char* message = "HabrOS 0.0.2         \n";
-    int nextpos = printl(video_memory, message, 0);
+    print("HabrOS 0.0.2 BUILD #1\n\rSource code you may see on Github: ", (char*)0x07);
+    print("https://github.com/KirillMos2/HabrOS\n\r", (char*)0x01);
+    print("For view all comamnds write ", (char*)0x07);
+    print("help\n", (char*)0x02);
     unsigned char command[70];
     unsigned char ch;
     unsigned char ch_dec;
     int i = 0;
     while(1) {
-        nextpos = printl(video_memory, ">>> ", nextpos);
+        print("\n\r", (char*)0x07);
+        print(">>> ", (char*)0x07);
         do {
             ch = getchar();
+            if (ch == (unsigned char)0x00) {continue;}
             ch_dec = transform(ch);
             if (ch_dec == (unsigned char)0x00) {continue;}
             if (ch_dec == (unsigned char)0x0A) {
-                nextpos = (nextpos/80+1)*80-1;
-                printc(video_memory, ' ', (char*)0x07, nextpos);
+                printc('\n', (char*)0x07);
+                printc('\r', (char*)0x07);
                 break;
             }
-            printc(video_memory, ch_dec, (char*)0x07, nextpos++);
-            command[i] = ch_dec;
-            i++;
+            printc(ch_dec, (char*)0x07);
+            if (ch_dec == (unsigned char)0x08) {
+                command[i-1] = '\0';
+                i--;
+            }
+            else {
+                command[i] = ch_dec;
+                i++;
+            } 
         } while (ch_dec != (unsigned char)0x0A);
-        command[i+1] = '\0';
-        if (strequ((const char*)command, (const char*)"11")) {
+        command[i] = '\0';
+        if (strequ((const char*)command, "shutdown")) {
             shutdown();
         }
-        if (strequ((const char*)command, (const char*)"12")) {
-            nextpos = printl(video_memory, version, nextpos++);
+        else if (strequ((const char*)command, "version")) {
+            print(version, (char*)0x07);
+        }
+        else if (strstart((const char*)command, "echo ")) {
+            for (int j = 5; j != (sizeof(command)/sizeof(unsigned char)); j++) {
+                printc((char)command[j], (char*)0x07);
+            }
+        }
+        else if (strequ((const char*)command, "ascii")) {
+            for (char h = 0; h != 256; h++) {
+                printc(h, (char*)0x07);
+            }
+        }
+        else {
+            print("Uwnkown command ", (char*)0x07);
+            print((const char*)command, (char*)0x07);
         }
         i = 0;
+        for (int g = 0; g!=70; g++) {
+            command[g] = '\0';
+        }
+        ch_dec = (unsigned char)0x00;
     }
 }
