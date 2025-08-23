@@ -8,5 +8,6 @@ HabrOS - ОС которую я пишу на Хабре.
 - xorriso
   
 Выполнить:
+- `mkdir bin`
 - `chmod +x ./build.sh`
 - `./build.sh`
