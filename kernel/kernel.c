@@ -1,9 +1,9 @@
+#include "types.h"
 #include "asm_methods.h"
 #include "syscalls.h"
 #include "pc_speaker.h"
 #include "stdio.h"
 #include "string.h"
-#include "types.h"
 #define MULTIBOOT_MAGIC 0x1BADB002
 #define MULTIBOOT_FLAGS 0
 
@@ -36,16 +36,17 @@ void _start() {
     write_logo();
     wait(5000);
     clear();
-    
     __asm__ volatile ("mov %0, %%esp" : : "r" (stack_top));
-
-    print("HabrOS 0.0.2 BUILD #1\n\rSource code you may see on Github: ", (char*)0x07);
+    print(version, (char*)0x07);
+    print("\n\rSource code you may see on Github: ", (char*)0x07);
     print("https://github.com/KirillMos2/HabrOS\n\r", (char*)0x01);
     print("For view all comamnds write ", (char*)0x07);
     print("help\n", (char*)0x02);
     unsigned char command[70];
     unsigned char ch;
     unsigned char ch_dec;
+    const char* history[10];
+    int history_point = 0;
     int i = 0;
     while(1) {
         print("\n\r", (char*)0x07);
@@ -83,9 +84,16 @@ void _start() {
             }
         }
         else if (strequ((const char*)command, "ascii")) {
-            for (char h = 0; h != 256; h++) {
-                printc(h, (char*)0x07);
+            for (int h = 0; h != 256; h++) {
+                printc((char)h, (char*)0x07);
             }
+        }
+        else if (strequ((const char*)command, "help")) {
+            print("help - this message\n\rversion - view version\n\rascii - view all ASCII symbols\n\recho <text> - echo text\n\rshutdown - shutdown PC", (char*)0x07);
+        }
+        else if (command[0] == '\0') {
+            i++;
+            i--;
         }
         else {
             print("Uwnkown command ", (char*)0x07);

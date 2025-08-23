@@ -8,6 +8,17 @@ void move_screen() {
     crspos = crspos - 80;
 }
 
+void move_cursor_inputing(int w) {
+    switch (w){
+        case 1:
+            if ((crspos / 80 * 80 + 4) < crspos) {crspos--;}
+            else {return;}
+        case 2:
+            if (vm[crspos*2] != '\0') {crspos++;}
+            else {return;}
+    }
+}
+
 void printc(char symb, char* color) {
     if (symb == '\a') {beep();}
     else if (symb == '\n') {
@@ -131,20 +142,22 @@ unsigned char transform(unsigned char ch) {
 }
 
 void write_logo() {
-    print("\n\n\n\n\n\n\n\n\r        /$$   /$$           /$$                  /$$$$$$   /$$$$$$     \n\r", (char*)0x03);
-    print("       | $$  | $$          | $$                 /$$__  $$ /$$__  $$     \n\r", (char*)0x03);
-    print("       | $$  | $$  /$$$$$$ | $$$$$$$   /$$$$$$ | $$  \\ $$| $$  \\__/     \n\r", (char*)0x03);
-    print("       | $$$$$$$$ |____  $$| $$__  $$ /$$__  $$| $$  | $$|  $$$$$$      \n\r", (char*)0x03);
-    print("       | $$__  $$  /$$$$$$$| $$  \\ $$| $$  \\__/| $$  | $$ \\____  $$     \n\r", (char*)0x03);
-    print("       | $$  | $$ /$$__  $$| $$  | $$| $$      | $$  | $$ /$$  \\ $$     \n\r", (char*)0x03);
-    print("       | $$  | $$|  $$$$$$$| $$$$$$$/| $$      |  $$$$$$/|  $$$$$$/     \n\r", (char*)0x03);
-    print("       |__/  |__/ \\_______/|_______/ |__/       \\______/  \\______/      \n\n\r", (char*)0x03);
-    print("                      HabrOS 0.0.2-pre 7th loading...", (char*)0x07);
+    print("\n\n\n\n\n\n\n\n\r        /$$   /$$           /$$                  /$$$$$$   /$$$$$$\n\r", (char*)0x03);
+    print("\t\t| $$  | $$          | $$                 /$$__  $$ /$$__  $$\n\r", (char*)0x03);
+    print("\t\t| $$  | $$  /$$$$$$ | $$$$$$$   /$$$$$$ | $$  \\ $$| $$  \\__/\n\r", (char*)0x03);
+    print("\t\t| $$$$$$$$ |____  $$| $$__  $$ /$$__  $$| $$  | $$|  $$$$$$\n\r", (char*)0x03);
+    print("\t\t| $$__  $$  /$$$$$$$| $$  \\ $$| $$  \\__/| $$  | $$ \\____  $$\n\r", (char*)0x03);
+    print("\t\t| $$  | $$ /$$__  $$| $$  | $$| $$      | $$  | $$ /$$  \\ $$\n\r", (char*)0x03);
+    print("\t\t| $$  | $$|  $$$$$$$| $$$$$$$/| $$      |  $$$$$$/|  $$$$$$/\n\r", (char*)0x03);
+    print("\t\t|__/  |__/ \\_______/|_______/ |__/       \\______/  \\______/\n\n\r", (char*)0x03);
+    print("\t\t\t\t\t  ", (char*)0x07);
+    print(version, (char*)0x07);
+    print(" loading...", (char*)0x07);
 }
 
 void clear() {
     for (int i = 0; i != 80*25*2; i++) {
-        vm[i] = ' ';
+        vm[i] = '\0';
         i++;
         vm[i] = (char*)0x07;
     }
