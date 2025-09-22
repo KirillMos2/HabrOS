@@ -5,7 +5,7 @@ typedef unsigned short ui16;
 typedef unsigned int ui32;
 typedef unsigned long ui64;
 
-typedef struct {
+typedef struct heap_cell {
     heap_cell* next;
     void* data;
-} heap_cell;
+};
